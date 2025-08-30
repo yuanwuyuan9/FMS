@@ -278,6 +278,8 @@ for dataset_name in DATASET_CONFIGS:
 DATASET_ORDER = ['FB15k-237', 'wn18rr', 'NELL995', 'DDB14', 'FB15k', 'wn18']
 
 # Inductive
+# The Inductive Learning datasets are placed in the Relation_Prediction directory, 
+# note the change in the address configuration of the data_loader.py , or place the datasets in the data folder
 # DATASET_ORDER = ["fb237_v1_ind", 'fb237_v2_ind', 'fb237_v3_ind','fb237_v4_ind']
 # DATASET_ORDER = ['nell_v2_ind', 'nell_v3_ind','nell_v4_ind']
 
