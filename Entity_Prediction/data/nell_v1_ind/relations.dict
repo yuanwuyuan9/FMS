@@ -1,0 +1,14 @@
+0	concept:worksfor
+1	concept:organizationhiredperson
+2	concept:agentcollaborateswithagent
+3	concept:agentcontrols
+4	concept:subpartoforganization
+5	concept:subpartof
+6	concept:headquarteredin
+7	concept:agentbelongstoorganization
+8	concept:organizationheadquarteredincity
+9	concept:organizationterminatedperson
+10	concept:acquired
+11	concept:companyeconomicsector
+12	concept:televisionstationaffiliatedwith
+13	concept:topmemberoforganization
