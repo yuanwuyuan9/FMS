@@ -243,7 +243,7 @@ class FMS(nn.Module):
         optimizer.zero_grad()
         model(batch)
         criterion = nn.CrossEntropyLoss()
-        loss = torch.mean(criterion(model.scores, model.labels))
+        loss = torch.mean(criterion(model.scores, model.labels)) + model.lamda * model.loss_cfm
         loss.backward()
         optimizer.step()
 
@@ -257,6 +257,7 @@ class FMS(nn.Module):
             model(batch)
             correct_predictions = (model.labels == model.scores.argmax(dim=1))
             return correct_predictions, model.scores
+
 
 
 
