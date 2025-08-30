@@ -40,7 +40,7 @@ Our work introduces the **Flow-Modulated Scoring (FMS)** framework, a novel para
 First, go to the `Relation Prediction folder`
 
 ```bash
-cd Relation_Prediction
+cd Relation_Prediction/src
 ```
 
 Second, All hyperparameters and experiment configurations are centralized in the `run.py` file.
@@ -57,7 +57,7 @@ python run.py
 First, go to the `Entity Prediction folder`
 
 ```bash
-cd Entity_Prediction
+cd Entity_Prediction/src
 ```
 
 Second, All hyperparameters and experiment configurations are centralized in the `run.py` file.
