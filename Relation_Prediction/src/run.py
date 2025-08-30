@@ -28,6 +28,7 @@ DATASET_CONFIGS = {
         '--neighbor_agg': 'attention',
         '--tok_k': '10',
         '--num_heads': '4',
+        '--lamda': '1.2',
     },
     'FB15k-237': {
         '--epoch': '20',
@@ -42,6 +43,7 @@ DATASET_CONFIGS = {
         '--neighbor_agg': 'attention',
         '--tok_k': '10',
         '--num_heads': '4',
+        '--lamda': '1.2',
     },
     'wn18': {
         '--epoch': '30',
@@ -56,6 +58,7 @@ DATASET_CONFIGS = {
         '--neighbor_agg': 'attention',
         '--tok_k': '4',
         '--num_heads': '4',
+        '--lamda': '1.2',
     },
     'wn18rr': {
         '--epoch': '30',
@@ -70,6 +73,7 @@ DATASET_CONFIGS = {
         '--neighbor_agg': 'attention',
         '--tok_k': '4',
         '--num_heads': '4',
+        '--lamda': '1.2',
     },
     'NELL995': {
         '--epoch': '30',
@@ -84,6 +88,7 @@ DATASET_CONFIGS = {
         '--neighbor_agg': 'attention',
         '--tok_k': '3',
         '--num_heads': '4',
+        '--lamda': '1.2',
     },
     'DDB14': {
         '--epoch': '30',
@@ -98,6 +103,7 @@ DATASET_CONFIGS = {
         '--neighbor_agg': 'attention',
         '--tok_k': '3',
         '--num_heads': '4',
+        '--lamda': '1.2',
     },
     'fb237_v1_ind': {
         '--epoch': '20',
@@ -112,6 +118,7 @@ DATASET_CONFIGS = {
         '--neighbor_agg': 'attention',
         '--tok_k': '10',
         '--num_heads': '4',
+        '--lamda': '1.2',
     },
     'fb237_v2_ind': {
         '--epoch': '20',
@@ -126,6 +133,7 @@ DATASET_CONFIGS = {
         '--neighbor_agg': 'attention',
         '--tok_k': '10',
         '--num_heads': '4',
+        '--lamda': '1.2',
     },
     'fb237_v3_ind': {
         '--epoch': '20',
@@ -140,6 +148,7 @@ DATASET_CONFIGS = {
         '--neighbor_agg': 'attention',
         '--tok_k': '10',
         '--num_heads': '4',
+        '--lamda': '1.2',
     },
     'fb237_v4_ind': {
         '--epoch': '20',
@@ -154,6 +163,7 @@ DATASET_CONFIGS = {
         '--neighbor_agg': 'attention',
         '--tok_k': '10',
         '--num_heads': '4',
+        '--lamda': '1.2',
     },
     'WN18RR_v1_ind': {
         '--epoch': '20',
@@ -168,6 +178,7 @@ DATASET_CONFIGS = {
         '--neighbor_agg': 'attention',
         '--tok_k': '4',
         '--num_heads': '4',
+        '--lamda': '1.2',
     },
     'WN18RR_v2_ind': {
         '--epoch': '20',
@@ -182,6 +193,7 @@ DATASET_CONFIGS = {
         '--neighbor_agg': 'attention',
         '--tok_k': '4',
         '--num_heads': '4',
+        '--lamda': '1.2',
     },
     'WN18RR_v3_ind': {
         '--epoch': '20',
@@ -196,6 +208,7 @@ DATASET_CONFIGS = {
         '--neighbor_agg': 'attention',
         '--tok_k': '4',
         '--num_heads': '4',
+        '--lamda': '1.2',
     },
     'WN18RR_v4_ind': {
         '--epoch': '20',
@@ -210,6 +223,7 @@ DATASET_CONFIGS = {
         '--neighbor_agg': 'attention',
         '--tok_k': '4',
         '--num_heads': '4',
+        '--lamda': '1.2',
     },
     'nell_v1_ind': {
         '--epoch': '20',
@@ -224,6 +238,7 @@ DATASET_CONFIGS = {
         '--neighbor_agg': 'attention',
         '--tok_k': '3',
         '--num_heads': '4',
+        '--lamda': '1.2',
     },
     'nell_v2_ind': {
         '--epoch': '20',
@@ -238,6 +253,7 @@ DATASET_CONFIGS = {
         '--neighbor_agg': 'attention',
         '--tok_k': '3',
         '--num_heads': '4',
+        '--lamda': '1.2',
     },
     'nell_v3_ind': {
         '--epoch': '20',
@@ -252,6 +268,7 @@ DATASET_CONFIGS = {
         '--neighbor_agg': 'attention',
         '--tok_k': '3',
         '--num_heads': '4',
+        '--lamda': '1.2',
     },
     'nell_v4_ind': {
         '--epoch': '20',
@@ -266,6 +283,7 @@ DATASET_CONFIGS = {
         '--neighbor_agg': 'attention',
         '--tok_k': '3',
         '--num_heads': '4',
+        '--lamda': '1.2',
     }
 }
 
