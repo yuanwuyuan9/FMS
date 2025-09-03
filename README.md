@@ -6,6 +6,8 @@
 
 This is the official PyTorch implementation of the paper **"Flow-Modulated Scoring for Semantic-Aware Knowledge Graph Completion"**.
 
+**[arXiv Paper](https://arxiv.org/abs/2506.23137)**
+
 Our work introduces the **Flow-Modulated Scoring (FMS)** framework, a novel paradigm for knowledge graph completion that unifies context-aware static representations with a dynamic evolutionary modeling of relations.
 
 ![FMS Architecture](FMS.png)
