@@ -74,6 +74,7 @@ def train(model_args, data):
         if args.use_context:
             train_entity_pairs = train_entity_pairs[index]
             train_edges = train_edges[index]
+        train_relations = train_relations[index]
         train_labels = train_labels[index]
 
         s = 0
@@ -201,4 +202,5 @@ def evaluate_and_rank(entity_pairs, labels, relations, triplets, true_ent, is_te
     hit10 = float(np.mean(rankings <= 10))
 
     return final_accuracy, (mrr, mr, hit1, hit3, hit10)
+
 
