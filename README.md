@@ -8,6 +8,8 @@ PyTorch implementation of **Flow-Modulated Scoring for Semantic-Aware Knowledge 
 
 Flow-Modulated Scoring (FMS) combines semantic-aware relational context with conditional flow modeling for knowledge graph completion. FMS learns continuous transformations of contextual representations and uses the resulting features to score candidate entities or relations.
 
+![FMS architecture](FMS.png)
+
 Training and evaluation workflows for entity prediction and temporal entity prediction follow [RED-GNN](https://github.com/LARS-research/RED-GNN). Relation prediction follows the training and evaluation workflow of [PathCon](https://github.com/hwwang55/PathCon).
 
 FMS is applied to the three tasks as follows:
