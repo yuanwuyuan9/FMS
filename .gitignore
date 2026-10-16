@@ -205,3 +205,11 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# Generated tail-prediction runs (logs, metrics, checkpoints)
+Entity_Prediction/Transductive/results/
+Entity_Prediction_TKG/results/
+
+# Local system files and Python tests
+.DS_Store
+**/tests/**/*.py

@@ -1,0 +1,93 @@
+{
+  "source": "RED-GNN-main/Static/transductive/data",
+  "original_fms_data_copy": "FMS-main/Entity_Prediction/data",
+  "datasets": {
+    "FB15k-237": {
+      "source": "RED-GNN-main/Static/transductive/data/fb15k-237",
+      "files": {
+        "entities.txt": {
+          "sha256": "4e5c6411f8c7acab59d9d333ee8f63a8a8c670ec5d2897a9436fc99bff162cb8",
+          "lines": 14541
+        },
+        "relations.txt": {
+          "sha256": "6237dd75b956dbc46cfa756b2cd45b7fe52a78484c3346471a7fccf4144a1160",
+          "lines": 237
+        },
+        "facts.txt": {
+          "sha256": "6b57f02f0edf4cd001ed358c2e969df77125fdc917770f088fbdd4a3695be9ba",
+          "lines": 204087
+        },
+        "train.txt": {
+          "sha256": "a7c0441b4b965226ee3c63611b1fef1a844441368a336ff77b2642bf11d03aa3",
+          "lines": 68028
+        },
+        "valid.txt": {
+          "sha256": "cf6309010852f6a8d47a45df830a426415d1ee6f7a3970a8376ff1fb81db4a5c",
+          "lines": 17535
+        },
+        "test.txt": {
+          "sha256": "5711cf41623ceb4eacc50eb6108a3ca6565c7492e3caaf82a3e355cc660d1574",
+          "lines": 20466
+        }
+      }
+    },
+    "nell": {
+      "source": "RED-GNN-main/Static/transductive/data/nell",
+      "files": {
+        "entities.txt": {
+          "sha256": "db0a2e1bd424e330d3bf5160872d2ab37c98436aa021db0ae7c20cb81012f01d",
+          "lines": 74536
+        },
+        "relations.txt": {
+          "sha256": "a2d7aa06a78b63ed3c7273cfa24d1c6f5e3784784064c8def4b3dca2073c1f09",
+          "lines": 200
+        },
+        "facts.txt": {
+          "sha256": "b4347c68aa16286d9e2a7d95ba51433b61679eca93b7ca93e6a4d0f48ca1147b",
+          "lines": 112258
+        },
+        "train.txt": {
+          "sha256": "0b4289005fcc5c73b943107bb525eb3ade6eb7df737dd5757f7a355554a92a7d",
+          "lines": 37420
+        },
+        "valid.txt": {
+          "sha256": "9c02548083036fd7ccc4ccec649a633fc3a58c544a0d28496cd751c35fef23a8",
+          "lines": 543
+        },
+        "test.txt": {
+          "sha256": "5fce32ea11fcf6f7da8da032fd989f8c028338c4debfc8077215bffd85e56ebd",
+          "lines": 2818
+        }
+      }
+    },
+    "umls": {
+      "source": "RED-GNN-main/Static/transductive/data/umls",
+      "files": {
+        "entities.txt": {
+          "sha256": "082c89718568e99ce54f52aa2d3a3cdf0711e0c45e46eb7de0fcf7a7fa8f2a44",
+          "lines": 135
+        },
+        "relations.txt": {
+          "sha256": "313de7c4aff4e14d962a6cadaffbd590dd5a01d11fc850a8531d5e26ee745db4",
+          "lines": 46
+        },
+        "facts.txt": {
+          "sha256": "76cdafb4d2c0f373a6376c71febcc2c7cd51ce8df020276e3a2eed2cac73c48c",
+          "lines": 4006
+        },
+        "train.txt": {
+          "sha256": "9c8f18fdcb5a0cc5dbbf5ec8150e1f00e446383520f9303ca47ea77dbef0dd17",
+          "lines": 1321
+        },
+        "valid.txt": {
+          "sha256": "ba822243da69339090b440d2324a83b33729d3d449132f757355a9f2bc3afca2",
+          "lines": 569
+        },
+        "test.txt": {
+          "sha256": "d72207ba52da6f9ca1a958a29e326c2b5cfa3b7a2b8d156d704644c325be3971",
+          "lines": 633
+        }
+      }
+    }
+  }
+}
