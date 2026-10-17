@@ -119,6 +119,10 @@ class TemporalData:
         differences = np.diff(np.unique(self.train[:, 3]))
         self.time_unit = int(time_unit or reduce(gcd, differences.tolist(), 1 if not len(differences) else 0))
         observed = np.concatenate((self.train, self.valid, self.test))
+        # Training answers are separate from held-out evaluation filters.
+        self.train_answers = defaultdict(set)
+        for head, relation, tail, timestamp in self.train:
+            self.train_answers[(int(head), int(relation), int(timestamp))].add(int(tail))
         self.filters = defaultdict(set)
         for head, relation, tail, timestamp in observed:
             self.filters[(int(head), int(relation), int(timestamp))].add(int(tail))

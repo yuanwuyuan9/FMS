@@ -37,7 +37,9 @@ def train(args, data=None, evaluate_test=True):
                     model='FMS', flow_enabled=True, semantic_weighting=model.semantic_weighting,
                     classification_loss=model.classification_loss,
                     endpoint_weight=model.endpoint_weight,
-                    loss='mean CE + lamda * mean CFM MSE + endpoint_weight * mean endpoint MSE')
+                    feature_normalization=model.feature_normalization,
+                    training_answer_filter='original facts + train, same (head, relation)',
+                    loss='mean training-positive-filtered CE + lamda * mean CFM MSE + endpoint_weight * mean endpoint MSE')
     print('Total trainable parameters: %d' % metadata['parameters'])
     print('start training ...', flush=True)
     best = None
@@ -55,7 +57,7 @@ def train(args, data=None, evaluate_test=True):
         for start in range(0, len(indices), args.batch_size):
             batch_indices = indices[start:start + args.batch_size]
             # Batch indices refer to targets, not to edges in the context graph.
-            batch = get_feed_dict(targets, batch_indices, device, training=False)
+            batch = get_feed_dict(targets, batch_indices, device, train_answers=data.train_answers)
             losses = model.train_step(model, optimizer, batch, return_components=True)
             for name, value in losses.items():
                 loss_sums[name] += value * len(batch_indices)
@@ -100,12 +102,21 @@ def train(args, data=None, evaluate_test=True):
     return model, dict(metadata=metadata, best=best, history=history)
 
 
-def get_feed_dict(triplets, indices, device, training=False):
+def get_feed_dict(triplets, indices, device, training=False, train_answers=None):
     # In-memory triples use (head, tail, relation).
-    triples = torch.as_tensor(triplets[indices], dtype=torch.long, device=device)
+    rows = triplets[indices]
+    triples = torch.as_tensor(rows, dtype=torch.long, device=device)
     batch = {'heads': triples[:, 0], 'relations': triples[:, 2], 'labels': triples[:, 1]}
     if training:
         batch['train_edges'] = torch.as_tensor(indices, dtype=torch.long, device=device)
+    other_rows, other_tails = [], []
+    if train_answers is not None:
+        for row, (head, tail, relation) in enumerate(rows):
+            answers = sorted(train_answers.get((int(head), int(relation)), set()) - {int(tail)})
+            other_rows.extend([row] * len(answers))
+            other_tails.extend(answers)
+        batch['other_answers'] = (torch.tensor(other_rows, dtype=torch.long, device=device),
+                                  torch.tensor(other_tails, dtype=torch.long, device=device))
     return batch
 
 

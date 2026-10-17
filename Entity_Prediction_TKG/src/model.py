@@ -49,6 +49,10 @@ class FMS(nn.Module):
         self.neighbor_samples = args.neighbor_samples
         self.context_hops = args.context_hops
         self.flow_steps = args.flow_steps
+        # Saved configurations without this field retain their original scoring.
+        self.feature_normalization = getattr(args, 'feature_normalization', 'none')
+        if self.feature_normalization not in ('none', 'layer_norm'):
+            raise ValueError('Unknown classifier feature normalization.')
         self.sampling_seed = args.seed
         self.sampling_time_scale = getattr(args, 'sampling_time_scale', 30.0)
         self.history_time_scale = getattr(args, 'history_time_scale', 30.0)
@@ -192,12 +196,18 @@ class FMS(nn.Module):
         if self.use_flow:
             endpoint = self._flow_endpoint(head_context, relation_emb)
             features.append(endpoint)
-        features = torch.cat(features, dim=-1)
+        features = self._classification_features(*features)
         scores = self.Linear_out_head(features)
         scores = self._fuse_history(scores, features, heads, relations, timestamps)
         if return_endpoint:
             return scores, head_context, endpoint
         return scores, head_context
+
+    def _classification_features(self, *features):
+        # The classifier and history gate share normalized inputs, not normalized flow targets.
+        if self.feature_normalization == 'layer_norm':
+            features = tuple(F.layer_norm(feature, (self.hidden_dim,), eps=1e-5) for feature in features)
+        return torch.cat(features, dim=-1)
 
     def _fuse_history(self, logits, features, heads, relations, timestamps):
         history = self.graph.historical_tail_distribution(
@@ -235,7 +245,11 @@ class FMS(nn.Module):
         timestamps = batch['timestamps']
         scores, head_context, endpoint = model._predict(
             batch['heads'], batch['relations'], timestamps, return_endpoint=True)
-        classification_loss = F.cross_entropy(scores, batch['labels'])
+        # Exclude other training positives from the CE denominator, retaining this target.
+        classification_scores = scores.clone()
+        if 'other_answers' in batch:
+            classification_scores[batch['other_answers']] = -torch.inf
+        classification_loss = F.cross_entropy(classification_scores, batch['labels'])
         loss = classification_loss
         flow_loss = scores.new_zeros(())
         endpoint_loss = scores.new_zeros(())

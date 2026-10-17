@@ -17,7 +17,7 @@ def print_setting(args):
     print('          FMS tail entity prediction          ')
     for name in ('dataset', 'epoch', 'batch_size', 'eval_batch_size', 'dim', 'l2', 'lr',
                  'decay_rate', 'seed', 'context_hops', 'neighbor_samples', 'neighbor_agg',
-                 'tok_k', 'num_heads', 'eval_samples', 'cfm_variant', 'cfm_model_dim',
+                 'tok_k', 'num_heads', 'eval_samples', 'feature_normalization', 'cfm_variant', 'cfm_model_dim',
                  'cfm_sigma', 'flow_steps', 'lamda', 'endpoint_weight'):
         print('%s: %s' % (name, getattr(args, name)))
     print('=============================================')
@@ -31,7 +31,8 @@ def main():
     devices = parser.add_mutually_exclusive_group()
     devices.add_argument('--cuda', dest='cuda', action='store_true', help='require CUDA (default)')
     devices.add_argument('--cpu', dest='cuda', action='store_false', help='run locally on CPU')
-    parser.set_defaults(cuda=True, use_context=True, feature_type='id', classification_loss='ce')
+    parser.set_defaults(cuda=True, use_context=True, feature_type='id', classification_loss='ce',
+                        feature_normalization='layer_norm')
     parser.add_argument('--seed', type=int, default=1234)
     parser.add_argument('--epoch', type=int)
     parser.add_argument('--batch_size', type=int)

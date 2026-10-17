@@ -8,9 +8,19 @@ from data_loader import load_data
 from model import FMS
 
 
-def get_feed_dict(events, indices, device):
-    events = torch.as_tensor(events[indices], dtype=torch.long, device=device)
-    return dict(heads=events[:, 0], relations=events[:, 1], labels=events[:, 2], timestamps=events[:, 3])
+def get_feed_dict(events, indices, device, train_answers=None):
+    rows = events[indices]
+    events = torch.as_tensor(rows, dtype=torch.long, device=device)
+    batch = dict(heads=events[:, 0], relations=events[:, 1], labels=events[:, 2], timestamps=events[:, 3])
+    other_rows, other_tails = [], []
+    if train_answers is not None:
+        for row, (head, relation, tail, timestamp) in enumerate(rows):
+            answers = sorted(train_answers.get((int(head), int(relation), int(timestamp)), set()) - {int(tail)})
+            other_rows.extend([row] * len(answers))
+            other_tails.extend(answers)
+        batch['other_answers'] = (torch.tensor(other_rows, dtype=torch.long, device=device),
+                                  torch.tensor(other_tails, dtype=torch.long, device=device))
+    return batch
 
 
 def filtered_ranks(scores, batch, filters):
@@ -88,13 +98,15 @@ def train(args, data=None, evaluate_test=True):
                     test_evaluated_during_training=False,
                     test_evaluated_after_selection=evaluate_test,
                     flow_enabled=model.use_flow,
+                    feature_normalization=model.feature_normalization,
+                    training_answer_filter='train only, same (head, relation, timestamp)',
                     eval_samples=args.eval_samples,
                     score_fusion='arithmetic mean of fixed sampled probabilities',
                     temporal_sampling='exponentially time-weighted outgoing events',
                     sampling_time_scale=model.sampling_time_scale,
                     temporal_prediction='learned gating of flow and historical tail distributions',
                     history_time_scale=model.history_time_scale,
-                    loss='mean CE + lamda * mean CFM MSE + endpoint_weight * mean endpoint MSE',
+                    loss='mean training-positive-filtered CE + lamda * mean CFM MSE + endpoint_weight * mean endpoint MSE',
                     smoke_test=bool(args.max_train_batches or args.max_eval_queries))
     print('Total trainable parameters: %d' % metadata['parameters'], flush=True)
     history, best, best_state = [], None, None
@@ -107,7 +119,7 @@ def train(args, data=None, evaluate_test=True):
         for start in range(0, len(indices), args.batch_size):
             selected = indices[start:start + args.batch_size]
             model.sampling_seed = int(np.random.randint(0, 2 ** 32))
-            batch = get_feed_dict(data.train, selected, device)
+            batch = get_feed_dict(data.train, selected, device, data.train_answers)
             losses = model.train_step(model, optimizer, batch, return_components=True)
             for name, value in losses.items():
                 sums[name] += len(selected) * value

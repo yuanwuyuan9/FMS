@@ -63,6 +63,10 @@ class TransductiveData:
             graph = build_kg(self.double(self.pool), self.n_entities, self.n_relations,
                                  neighbor_samples, np.random.RandomState(eval_seed))
             self.eval_neighbors.append(graph[0])
+        # Training answers are separate from held-out evaluation filters.
+        self.train_answers = defaultdict(set)
+        for head, tail, relation in self.pool:
+            self.train_answers[(int(head), int(relation))].add(int(tail))
         self.filters = defaultdict(set)
         for head, tail, relation in np.concatenate((self.pool, self.valid, self.test)):
             self.filters[(int(head), int(relation))].add(int(tail))

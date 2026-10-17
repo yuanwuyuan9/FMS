@@ -38,6 +38,10 @@ class FMS(nn.Module):
         self.neighbor_samples = args.neighbor_samples
         self.context_hops = args.context_hops
         self.flow_steps = args.flow_steps
+        # Saved configurations without this field retain their original scoring.
+        self.feature_normalization = getattr(args, 'feature_normalization', 'none')
+        if self.feature_normalization not in ('none', 'layer_norm'):
+            raise ValueError('Unknown classifier feature normalization.')
         # Tail prediction uses outgoing context and semantic neighbor weights.
         if getattr(args, 'semantic_weighting', 'softmax') != 'softmax':
             raise ValueError('Legacy mean weighting is no longer supported.')
@@ -192,10 +196,16 @@ class FMS(nn.Module):
         head_context = self.encode_context(heads, relations, train_edges)
         relation_emb = self.relation_features_base[relations]
         endpoint = self._flow_endpoint(head_context, relation_emb)
-        scores = self.Linear_out_head(torch.cat((head_context, relation_emb, endpoint), dim=-1))
+        scores = self.Linear_out_head(self._classification_features(head_context, relation_emb, endpoint))
         if return_endpoint:
             return scores, head_context, endpoint
         return scores, head_context
+
+    def _classification_features(self, *features):
+        # Normalize each scoring input independently; flow supervision keeps its original scale.
+        if self.feature_normalization == 'layer_norm':
+            features = tuple(F.layer_norm(feature, (self.hidden_dim,), eps=1e-5) for feature in features)
+        return torch.cat(features, dim=-1)
 
     def forward(self, heads, relations, train_edges=None):
         """Return [batch, n_entities] scores without accepting answer labels."""
@@ -218,7 +228,11 @@ class FMS(nn.Module):
         train_edges = batch.get('train_edges')
         scores, head_context, endpoint = model._predict(
             batch['heads'], batch['relations'], train_edges, return_endpoint=True)
-        classification_loss = F.cross_entropy(scores, batch['labels'])
+        # Exclude other training positives from the CE denominator, retaining this target.
+        classification_scores = scores.clone()
+        if 'other_answers' in batch:
+            classification_scores[batch['other_answers']] = -torch.inf
+        classification_loss = F.cross_entropy(classification_scores, batch['labels'])
         loss = classification_loss
         flow_loss = scores.new_zeros(())
         endpoint_loss = scores.new_zeros(())
