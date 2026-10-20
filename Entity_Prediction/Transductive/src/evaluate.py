@@ -7,11 +7,11 @@ import torch
 
 from model import FMS
 from data_loader import TransductiveData, default_data_directory
-from train import evaluate_tail, _format_metrics
+from train import evaluate_head_tail, print_metrics
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Evaluate FMS tail prediction')
+    parser = argparse.ArgumentParser(description='Evaluate FMS head and tail prediction')
     parser.add_argument('--checkpoint', type=Path, required=True)
     parser.add_argument('--data_dir', type=Path, help='override saved data location')
     parser.add_argument('--eval_samples', type=int, default=4)
@@ -50,14 +50,16 @@ def main():
     metadata.update(checkpoint=str(checkpoint), device=str(device), eval_batch_size=batch_size,
                     checkpoint_eval_samples=saved['config'].get('eval_samples', 1),
                     selection='fixed supplied checkpoint; no new model selection',
+                    training_supervision=original_metadata.get('training_supervision', 'unknown'),
+                    checkpoint_training_supervision=original_metadata.get('training_supervision', 'unknown'),
                     test_evaluated=not options.skip_test)
     print(json.dumps(metadata, indent=2), flush=True)
-    valid = evaluate_tail(model, data.valid, data, batch_size)
-    print('[VALID] ' + _format_metrics(valid['tail']), flush=True)
+    valid = evaluate_head_tail(model, data.valid, data, batch_size)
+    print_metrics('VALID', valid)
     test = None
     if not options.skip_test:
-        test = evaluate_tail(model, data.test, data, batch_size)
-        print('[TEST]  ' + _format_metrics(test['tail']), flush=True)
+        test = evaluate_head_tail(model, data.test, data, batch_size)
+        print_metrics('TEST', test)
     output.parent.mkdir(parents=True, exist_ok=True)
     with output.open('x') as handle:
         json.dump(dict(metadata=metadata, valid=valid, test=test), handle, indent=2)

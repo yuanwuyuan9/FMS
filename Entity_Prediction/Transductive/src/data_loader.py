@@ -65,10 +65,10 @@ class TransductiveData:
             self.eval_neighbors.append(graph[0])
         # Training answers are separate from held-out evaluation filters.
         self.train_answers = defaultdict(set)
-        for head, tail, relation in self.pool:
+        for head, tail, relation in self.double(self.pool):
             self.train_answers[(int(head), int(relation))].add(int(tail))
         self.filters = defaultdict(set)
-        for head, tail, relation in np.concatenate((self.pool, self.valid, self.test)):
+        for head, tail, relation in self.double(np.concatenate((self.pool, self.valid, self.test))):
             self.filters[(int(head), int(relation))].add(int(tail))
 
     def read_triplets(self, split):
@@ -98,10 +98,10 @@ class TransductiveData:
         graph = build_kg(self.double(facts), self.n_entities, self.n_relations,
                              self.neighbor_samples, self.neighbor_rng)
         stats = dict(fact_triples=len(facts), target_triples=len(targets),
-                     supervised_triples=len(targets),
+                     supervised_triples=2 * len(targets),
                      fact_sha256=hashlib.sha256(facts.tobytes()).hexdigest(),
                      target_sha256=hashlib.sha256(targets.tobytes()).hexdigest())
-        return targets, graph, stats
+        return self.double(targets), graph, stats
 
     def metadata(self):
         return dict(protocol='redgnn', data_directory=str(self.directory),
@@ -109,14 +109,14 @@ class TransductiveData:
                     observed_pool=len(self.pool), original_valid=len(self.valid), original_test=len(self.test),
                     entities=self.n_entities, base_relations=self.base_n_relations,
                     model_relations=self.n_relations, context_direction='outgoing',
-                    prediction_direction='tail', semantic_weighting='softmax',
-                    training_supervision='forward triples only',
+                    prediction_direction='both', semantic_weighting='softmax',
+                    training_supervision='forward and inverse triples',
                     graph_encoder='FMS sampled outgoing-edge context',
                     partition='original facts/train in epoch 1; then random 3:1 split before inverses',
                     evaluation_graph='fixed sampled context from original facts+train and their inverses',
                     eval_samples=len(self.eval_neighbors), eval_seeds=self.eval_seeds,
                     score_fusion='arithmetic mean of raw logits before filtering/ranking',
-                    evaluation='tail-only filtered average-tie ranks',
+                    evaluation='head and tail filtered average-tie ranks; arithmetic mean of directional metrics',
                     rng='separate partition/training-neighbor/evaluation-neighbor RNGs with the same seed',
                     split_sha256={name: hashlib.sha256((self.directory / (name + '.txt')).read_bytes()).hexdigest()
                                   for name in ('facts', 'train', 'valid', 'test')})

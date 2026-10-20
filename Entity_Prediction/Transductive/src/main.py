@@ -14,7 +14,7 @@ from run import DATASET_CONFIGS
 def print_setting(args):
     print()
     print('=============================================')
-    print('          FMS tail entity prediction          ')
+    print('          FMS head and tail entity prediction          ')
     for name in ('dataset', 'epoch', 'batch_size', 'eval_batch_size', 'dim', 'l2', 'lr',
                  'decay_rate', 'seed', 'context_hops', 'neighbor_samples', 'neighbor_agg',
                  'tok_k', 'num_heads', 'eval_samples', 'feature_normalization', 'cfm_variant', 'cfm_model_dim',
@@ -25,7 +25,7 @@ def print_setting(args):
 
 
 def main():
-    parser = argparse.ArgumentParser(description='FMS tail entity prediction')
+    parser = argparse.ArgumentParser(description='FMS head and tail entity prediction')
     parser.add_argument('--dataset', required=True, choices=list(DATASET_CONFIGS))
     parser.add_argument('--data_dir', type=Path, help='directory containing facts/train/valid/test and vocabularies')
     devices = parser.add_mutually_exclusive_group()

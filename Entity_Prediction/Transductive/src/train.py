@@ -9,9 +9,7 @@ from model import FMS
 
 
 def train(args, data=None, evaluate_test=True):
-    """Select by tail validation MRR; evaluate test once after restoring the best model."""
-    if getattr(args, 'prediction_direction', 'tail') != 'tail':
-        raise ValueError('Only tail prediction is supported.')
+    """Select by mean head/tail validation MRR; evaluate test once after restoring the best model."""
     output_path = Path(args.results_json) if args.results_json else None
     checkpoint_path = Path(args.checkpoint) if getattr(args, 'checkpoint', None) else None
     paths = [p.resolve() for p in (output_path, checkpoint_path) if p is not None]
@@ -31,14 +29,14 @@ def train(args, data=None, evaluate_test=True):
                  if args.decay_rate != 1.0 else None)
     metadata = data.metadata()
     metadata.update(config=vars(args).copy(), device=str(device),
-                    selection_metric='validation.tail.mrr',
+                    selection_metric='validation.average.mrr',
                     parameters=sum(p.numel() for p in model.parameters()),
                     test_evaluated_during_training=False, test_evaluated_after_selection=evaluate_test,
                     model='FMS', flow_enabled=True, semantic_weighting=model.semantic_weighting,
                     classification_loss=model.classification_loss,
                     endpoint_weight=model.endpoint_weight,
                     feature_normalization=model.feature_normalization,
-                    training_answer_filter='original facts + train, same (head, relation)',
+                    training_answer_filter='original facts + train and inverses, same (head, relation)',
                     loss='mean training-positive-filtered CE + lamda * mean CFM MSE + endpoint_weight * mean endpoint MSE')
     print('Total trainable parameters: %d' % metadata['parameters'])
     print('start training ...', flush=True)
@@ -67,7 +65,7 @@ def train(args, data=None, evaluate_test=True):
             scheduler.step()
 
         model.set_graph(data.eval_graph)
-        valid = evaluate_tail(model, data.valid, data, args.eval_batch_size)
+        valid = evaluate_head_tail(model, data.valid, data, args.eval_batch_size)
         losses = {name: value / len(targets) for name, value in loss_sums.items()}
         result = dict(epoch=epoch + 1, loss=losses['total'], losses=losses, graph=stats, valid=valid, test=None,
                       optimizer_steps=optimizer_steps, cumulative_optimizer_steps=cumulative_optimizer_steps)
@@ -78,8 +76,8 @@ def train(args, data=None, evaluate_test=True):
               f'weighted_cfm: {losses["weighted_cfm"]:.6f} '
               f'weighted_end: {losses["weighted_endpoint"]:.6f} '
               f'facts: {stats["fact_triples"]} supervised: {len(targets)}', flush=True)
-        print('[VALID] ' + _format_metrics(valid['tail']), flush=True)
-        if best is None or valid['tail']['mrr'] > best['valid']['tail']['mrr']:
+        print_metrics('VALID', valid)
+        if best is None or valid['average']['mrr'] > best['valid']['average']['mrr']:
             best = result
             best_state = {name: tensor.detach().cpu().clone() for name, tensor in model.state_dict().items()}
     # Every saved state has the same fixed evaluation graph, despite varying train graphs.
@@ -87,11 +85,11 @@ def train(args, data=None, evaluate_test=True):
     model.eval()
     best = dict(best)
     if evaluate_test:
-        best['test'] = evaluate_tail(model, data.test, data, args.eval_batch_size)
-    print(f'final results (best validation tail MRR, epoch {best["epoch"]})', flush=True)
-    print('[VALID] ' + _format_metrics(best['valid']['tail']), flush=True)
+        best['test'] = evaluate_head_tail(model, data.test, data, args.eval_batch_size)
+    print(f'final results (best validation mean head/tail MRR, epoch {best["epoch"]})', flush=True)
+    print_metrics('VALID', best['valid'])
     if best['test'] is not None:
-        print('[TEST]  ' + _format_metrics(best['test']['tail']), flush=True)
+        print_metrics('TEST', best['test'])
     if checkpoint_path is not None:
         with checkpoint_path.open('xb') as handle:
             torch.save(dict(config=vars(args).copy(), metadata=metadata,
@@ -195,3 +193,17 @@ def _format_metrics(metrics):
 def evaluate_tail(model, triples, data, batch_size):
     tables = data.eval_neighbors if len(data.eval_neighbors) > 1 else None
     return dict(tail=evaluate_and_rank(model, triples, data.filters, batch_size, neighbor_tables=tables))
+
+
+def evaluate_head_tail(model, triples, data, batch_size):
+    tail = evaluate_tail(model, triples, data, batch_size)['tail']
+    head = evaluate_tail(model, data.inverse(triples), data, batch_size)['tail']
+    # Each original triple contributes one head rank and one tail rank.
+    average = {name: (head[name] + tail[name]) / 2 for name in tail if name != 'count'}
+    average['count'] = head['count'] + tail['count']
+    return dict(head=head, tail=tail, average=average)
+
+
+def print_metrics(split, metrics):
+    for direction in ('head', 'tail', 'average'):
+        print(f'[{split} {direction.upper()}] ' + _format_metrics(metrics[direction]), flush=True)
